@@ -1,5 +1,12 @@
 # WIP: unit test case generator for python in golang style
 
+# TODO:
+
+- [ ] support pytest
+- [ ] support methods
+- [ ] write more tests
+- [ ] far future: autoimport neccesary types for tests
+- [ ] write FAQ and create simple github page
 
 now it geneates for python function:
 
