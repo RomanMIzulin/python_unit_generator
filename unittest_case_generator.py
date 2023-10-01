@@ -1,5 +1,11 @@
 import inspect
 from dataclasses import dataclass
+from typing import Any, Callable, TypeVar, ParamSpec
+
+
+ReturnType = TypeVar("ReturnType")  # the callable/awaitable return type
+Param = ParamSpec("Param")  # the callable parameters
+
 
 
 class NotFullyTypedError(Exception):
@@ -8,7 +14,8 @@ class NotFullyTypedError(Exception):
     pass
 
 
-def generate_test_case(func):
+
+def generate_test_case(func: Callable[Param, ReturnType]) -> str: # type: ignore
     sig: inspect.Signature = inspect.signature(func)
 
     # check if all parameters are annotated
@@ -24,21 +31,21 @@ def generate_test_case(func):
     def test_func():
         @dataclass
         class Args:
-            args_here  # type: ignore
+            ...
 
         @dataclass
         class Test:
             name: str
             args: Args
-            want: output_type  # type: ignore
+            want: ReturnType
 
         cases: tuple[Test] = (  # type: ignore
             # TODO: add cases here
         )
-        print(f"running cases for {func.__name__()} function")
+        print(f"running cases for {func.__name__} function")
         for case in cases:
-            if (v := func(*case.args)) != case.want:
-                print(f"{case.name} {func.__name__()} got {v} wanted {case.want}")
+            if (v := func(*case.args)) != case.want: # type: ignore
+                print(f"{case.name} {func.__name__} got {v} wanted {case.want}")
 
     test_func.__name__ = f"test_{func.__name__}"
 
@@ -54,24 +61,25 @@ def generate_test_case(func):
     return (
         inspect.getsource(test_func)
         .replace("test_func", f"test_{func.__name__}")
-        .replace("output_type", sig.return_annotation.__name__)
-        .replace("args_here", args_txt)
+        .replace("ReturnType", sig.return_annotation.__name__)
+        .replace("...", args_txt)
+        .replace("# type: ignore", "")
     )
 
-def save_to_file(func, file_path: str| None):
+def save_to_file(func: Callable[Param, Any], file_path: str| None):
     # by default to the same directory where funtion is defined
     if file_path is None:
         file_path = inspect.getfile(func).replace(".py", "_test.py")
     with open(file_path, "w") as f:
         f.write(generate_test_case(func))
 
-def append_to_file(file_path: str, func):
+def append_to_file(file_path: str, func: Callable[Param, Any]):
     with open(file_path, "a") as f:
         f.write('\n\n')
         f.write(generate_test_case(func))
 
-def kek(arg1: int, arg2: str) -> str:
-    return str(arg1) + arg2
+def kek(foo: int, bar: str) -> str:
+    return str(foo) + bar
 
 if __name__ == "__main__":
     print(generate_test_case(kek))
