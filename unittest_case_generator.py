@@ -105,5 +105,5 @@ if __name__ == "__main__":
         return str(foo) + bar
 
     print(generate_test_case(kek))
-    #print(generate_test_case(generate_test_case))
-    #save_to_file(generate_test_case, "test.py")
+    # print(generate_test_case(generate_test_case))
+    # save_to_file(generate_test_case, "test.py")
