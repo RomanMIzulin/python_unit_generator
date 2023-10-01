@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+    "Operating System :: OS Linux",
 ]
 [project.urls]
 "Homepage" = "https://github.com/RomanMIzulin/python_unit_generator"
@@ -19,3 +19,6 @@ classifiers = [
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.python_unit_generator]
+root_directory = "python_units"
