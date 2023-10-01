@@ -1,6 +1,13 @@
 import inspect
 import os
-from typing import Callable, NamedTuple
+ 
+from dataclasses import dataclass
+from typing import Any, Callable, TypeVar, ParamSpec, NamedTuple
+
+
+ReturnType = TypeVar("ReturnType")  # the callable/awaitable return type
+Param = ParamSpec("Param")  # the callable parameters
+
 
 
 class NotFullyTypedError(Exception):
@@ -9,7 +16,8 @@ class NotFullyTypedError(Exception):
     pass
 
 
-def generate_test_case(func: Callable) -> str:
+
+def generate_test_case(func: Callable[Param, ReturnType]) -> str: # type: ignore
     sig: inspect.Signature = inspect.signature(func)
 
     # check if all parameters are annotated
@@ -25,21 +33,25 @@ def generate_test_case(func: Callable) -> str:
     func_name = func  # ugly hack
 
     def test_func():
+
         class Args(NamedTuple):
-            args_here  # type: ignore
-        class Test(NamedTuple):
+            ...
+
+        class Test:
             name: str
             args: Args
-            want: output_type  # type: ignore
+            want: ReturnType
 
         cases: tuple[Test] = (  # type: ignore
             # TODO: add cases here
         )
+        
         print(f"running test cases for func_name function:\n")
         for case in cases:
-            if (v := func_name(*case.args)) != case.want:
-                print(f"{case.name} func_name got {v}, wanted: {case.want}\n")
+            if (v := func(*case.args)) != case.want:  # type: ignore
+                print(f"{case.name} func_name got {v} wanted {case.want}")
         print('Test complited')
+    test_func.__name__ = f"test_{func.__name__}"
 
     args_txt = ""
     cnt = 0
@@ -55,8 +67,8 @@ def generate_test_case(func: Callable) -> str:
         .replace("  # type: ignore", "")
         .replace("test_func", f"test_{func.__name__}")
         .replace("func_name", f"{func.__name__}")
-        .replace("output_type", sig.return_annotation.__name__)
-        .replace("args_here", args_txt)
+        .replace("ReturnType", sig.return_annotation.__name__)
+        .replace("...", args_txt)
     )
     tmp = res.splitlines(keepends=True)
     final_res = ""
@@ -64,9 +76,7 @@ def generate_test_case(func: Callable) -> str:
         final_res += line[4:] if len(line) > 4 else line
     return final_res
 
-
-
-def save_to_file(func, file_path: str | None):
+def save_to_file(func: Callable[Param, Any], file_path: str| None):
     # by default to the same directory where funtion is defined
     if file_path is None:
         file_path = inspect.getfile(func).replace(".py", "_test.py")
@@ -79,17 +89,17 @@ def save_to_file(func, file_path: str | None):
         f.write(f'from {inspect.getfile(func).replace(".py", "").split("/")[-1]} import {func.__name__}\n\n')
         f.write(generate_test_case(func))
 
-
-def append_to_file(file_path: str, func):
+def append_to_file(file_path: str, func: Callable[Param, Any]):
     with open(file_path, "a") as f:
         f.write("\n\n")
         f.write(generate_test_case(func))
 
 
+
 if __name__ == "__main__":
 
-    def kek(arg1: int, arg2: str) -> str:
-        return str(arg1) + arg2
+    def kek(foo: int, bar: str) -> str:
+        return str(foo) + bar
 
     print(generate_test_case(kek))
     print(generate_test_case(generate_test_case))
