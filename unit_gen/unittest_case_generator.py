@@ -48,7 +48,7 @@ def generate_test_case(func: Callable[Param, ReturnType]) -> str: # type: ignore
         
         print(f"running test cases for func_name function:\n")
         for case in cases:
-            if (v := func(*case.args)) != case.want:  # type: ignore
+            if (v := func_name(*case.args)) != case.want:  # type: ignore
                 print(f"{case.name} func_name got {v} wanted {case.want}")
         print('Test complited')
 
@@ -66,7 +66,7 @@ def generate_test_case(func: Callable[Param, ReturnType]) -> str: # type: ignore
         .replace("  # type: ignore", "")
         .replace("test_func", f"test_{func.__name__}")
         .replace("func_name", f"{func.__name__}")
-        .replace("ReturnType", sig.return_annotation.__name__)
+        .replace("ReturnType", sig.return_annotation)
         .replace("...", args_txt)
     )
     tmp = res.splitlines(keepends=True)
