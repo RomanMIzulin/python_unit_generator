@@ -1,5 +1,9 @@
 # template unit test case generator for python in golang style
 
+VScode extension: https://github.com/RomanMIzulin/python_unittest_vscode
+
+Can be found in vscode by unittest_generator or just via direct link https://marketplace.visualstudio.com/items?itemName=RomanMatveev.unittest-generator
+
 # TODO:
 
 - [ ] support pytest
