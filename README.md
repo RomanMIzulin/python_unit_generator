@@ -1,4 +1,4 @@
-# WIP: unit test case generator for python in golang style
+# template unit test case generator for python in golang style
 
 # TODO:
 
