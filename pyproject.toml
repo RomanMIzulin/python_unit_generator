@@ -1,6 +1,6 @@
 [project]
-name = "unit_gen"
-version = "0.0.1"
+name = "python-unit-generator"
+version = "0.0.2"
 authors = [
   { name="Roman Matveev", email="dazyra@gmail.com" },
 ]
