@@ -17,7 +17,7 @@ class NotFullyTypedError(Exception):
 
 
 
-def generate_test_case(func: Callable[Param, ReturnType]) -> str: # type: ignore
+def generate_test_case(func: Callable[Param, ReturnType], is_pytest: bool = False) -> str: # type: ignore
     sig: inspect.Signature = inspect.signature(func)
 
     # check if all parameters are annotated
@@ -32,6 +32,7 @@ def generate_test_case(func: Callable[Param, ReturnType]) -> str: # type: ignore
     
     func_name = func  # ugly hack
 
+    # func used as template
     def test_func():
 
         class Args(NamedTuple):
@@ -52,6 +53,30 @@ def generate_test_case(func: Callable[Param, ReturnType]) -> str: # type: ignore
                 print(f"{case.name} func_name got {v} wanted {case.want}")
         print('Test complited')
 
+    def pytested_test_func():
+        import pytest
+
+        @dataclass
+        class TestArgs:
+            ...
+
+
+        @dataclass
+        class KekTest:
+            name: str
+            args: TestArgs
+            want: ReturnType
+
+
+        @pytest.mark.parametrize(
+            "test_case",
+            [
+                KekTest(name="name of test1", args=TestArgs(arg1=1, arg2=""), want=ReturnType()),
+            ],
+        )
+        def test_kek(test_case: KekTest):
+            assert func_name(*test_case.args) == test_case.want
+
     args_txt = ""
     cnt = 0
     for _, v in sig.parameters.items():
@@ -62,10 +87,10 @@ def generate_test_case(func: Callable[Param, ReturnType]) -> str: # type: ignore
             cnt += 1
 
     res = (
-        inspect.getsource(test_func)
+        inspect.getsource(pytested_test_func if is_pytest else test_func)
         .replace("  # type: ignore", "")
         .replace("test_func", f"test_{func.__name__}")
-        .replace("func_name", f"{func.__name__}")
+        .replace(f"{'pytested_test_func' if is_pytest else 'test_func'}", f"{func.__name__}")
         .replace("ReturnType", sig.return_annotation)
         .replace("...", args_txt)
     )
